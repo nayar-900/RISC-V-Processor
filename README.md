@@ -1,13 +1,13 @@
 
 # RISC-V 5-Stage Pipelined Processor (RV32I) – Verilog Implementation
 
-This project is a complete implementation of a 5-stage pipelined **RISC-V RV32I** processor using **Verilog HDL**. Designed as part of a university Computer Architecture Lab, it simulates the fundamental operation of a modern pipelined CPU, including **hazard detection**, **forwarding**, **memory interfacing**, and **basic control signal logic**.
+This project completely implements a 5-stage pipelined **RISC-V RV32I** processor using **Verilog HDL**. Designed as part of a university Computer Architecture Lab, it simulates the fundamental operation of a modern pipelined CPU, including **hazard detection**, **forwarding**, **memory interfacing**, and **basic control signal logic**.
 
 ---
 
 ## Features
 
-- ✅ **Fully Modular Design** – Each stage of the pipeline and its logic are implemented in separate Verilog modules for clarity and reuse.
+- ✅ **Fully Modular Design** – Each pipeline stage and its logic are implemented in separate Verilog modules for clarity and reuse.
 - ✅ **Instruction Support (RV32I):**
   - **R-type:** `add`, `sub`, `and`, `or`, `xor`, `sll`, `srl`, `sra`, `slt`
   - **I-type:** `addi`, `andi`, `ori`, `xori`, `slti`, `slli`, `srli`, `srai`
@@ -56,7 +56,7 @@ This project is a complete implementation of a 5-stage pipelined **RISC-V RV32I*
 ## Simulation Instructions (ModelSim / QuestaSim)
 
 1. Create a new project in ModelSim or QuestaSim.
-2. Add all Verilog files including `Testbench.v`.
+2. Add all Verilog files, including `Testbench.v`.
 3. Compile the project.
 4. Run simulation and observe:
    - Console outputs (register values, memory content)
@@ -66,7 +66,7 @@ This project is a complete implementation of a 5-stage pipelined **RISC-V RV32I*
 
 ## Sample Instruction Set Used
 
-```assembly
+``` assembly
 addi x1, x0, 5       // Load immediate
 add x2, x1, x1       // Addition
 sub x3, x2, x1       // Subtraction
@@ -82,7 +82,7 @@ jal x5, 16           // Jump and link
 
 * Printed register contents after execution
 * Memory values updated with `sw`
-* Pipeline movement visible in waveform
+* Pipeline movement visible in the waveform
 * Hazard signals activated for dependencies
 
 ---
@@ -103,15 +103,15 @@ We have also developed a **GUI pipeline simulator** in HTML/CSS/JS:
 
 * Simulates IF → ID → EX → MEM → WB stages
 * Step-by-step animation or auto-run
-* Register file, memory, control signals shown
+* Register file, memory, and control signals shown
 * Helpful for understanding pipeline behavior visually
 
 ---
 
 ## Team
 
-* **Lead Developer & Documenter:** Your Name
-* **RTL Code & Debugging:** Rehan, Yasir
+* **Lead Developer & Documenter:** Rehan ali, Rayan Badar
+* **RTL Code & Debugging:** Shariq Khan, M. Yasir
 * **Institute:** Namal University, Mianwali
 * **Course:** Computer Architecture Lab Project
 
