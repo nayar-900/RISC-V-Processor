@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RISC-V Pipeline Processor Simulator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #0a0f1e;
+      color: #e0f7fa;
+      margin: 0;
+      padding: 1rem;
+    }
+    h1, h2 {
+      color: #29b6f6;
+      border-bottom: 2px solid #29b6f6;
+      padding-bottom: 0.3rem;
+    }
+    .stage-container, .registers, .memory, .controls, .signals, .stats {
+      margin-bottom: 2rem;
+    }
+    .stage-grid, .register-grid, .memory-grid, .signal-grid, .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+    .stage, .reg, .mem, .sig, .stat {
+      padding: 1rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    }
+    button {
+      background-color: #29b6f6;
+      color: #0a0f1e;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      margin-right: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #4fc3f7;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>RISC-V 5-Stage Pipelined Processor</h1>
+
+  <div class="controls">
+    <h2>Control Panel</h2>
+    <button onclick="startSimulation()">Start Auto Simulation</button>
+    <button onclick="resetSimulation()">Reset</button>
+    <div>Cycle: <span id="cycle">0</span></div>
+  </div>
+
+  <div class="stage-container">
+    <h2>Pipeline Stages</h2>
+    <div class="stage-grid">
+      <div class="stage" id="ifStage">IF: --</div>
+      <div class="stage" id="idStage">ID: --</div>
+      <div class="stage" id="exStage">EX: --</div>
+      <div class="stage" id="memStage">MEM: --</div>
+      <div class="stage" id="wbStage">WB: --</div>
+    </div>
+  </div>
+
+  <div class="registers">
+    <h2>Registers</h2>
+    <div class="register-grid" id="registerGrid"></div>
+  </div>
+
+  <div class="memory">
+    <h2>Data Memory</h2>
+    <div class="memory-grid" id="memoryGrid"></div>
+  </div>
+
+  <div class="signals">
+    <h2>Control Signals</h2>
+    <div class="signal-grid">
+      <div class="sig">RegWrite: <span id="regWrite">0</span></div>
+      <div class="sig">MemRead: <span id="memRead">0</span></div>
+      <div class="sig">MemWrite: <span id="memWrite">0</span></div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <h2>Statistics</h2>
+    <div class="stats-grid">
+      <div class="stat">Instructions: <span id="instCount">0</span></div>
+      <div class="stat">Stalls: <span id="stallCount">0</span></div>
+      <div class="stat">CPI: <span id="cpi">0.00</span></div>
+    </div>
+  </div>
+
+  <script>
+    const instructions = [
+      "addi x1, x0, 5",
+      "add x2, x1, x1",
+      "sub x3, x2, x1",
+      "lw x4, 0(x2)",
+      "sw x4, 4(x2)",
+      "beq x1, x3, 8",
+      "xor x5, x1, x2"
+    ];
+
+    let pipeline = ["", "", "", "", ""];
+    let cycle = 0;
+    let interval;
+    let instCount = 0;
+    let reg = Array.from({ length: 32 }, (_, i) => i * 2);  // Pre-filled
+    let mem = Array.from({ length: 16 }, (_, i) => i * 4);  // Pre-filled
+
+    function updateDisplay() {
+      document.getElementById("cycle").innerText = cycle;
+      document.getElementById("ifStage").innerText = `IF: ${pipeline[0] || '--'}`;
+      document.getElementById("idStage").innerText = `ID: ${pipeline[1] || '--'}`;
+      document.getElementById("exStage").innerText = `EX: ${pipeline[2] || '--'}`;
+      document.getElementById("memStage").innerText = `MEM: ${pipeline[3] || '--'}`;
+      document.getElementById("wbStage").innerText = `WB: ${pipeline[4] || '--'}`;
+
+      const rgrid = document.getElementById("registerGrid");
+      rgrid.innerHTML = "";
+      reg.forEach((val, i) => {
+        const div = document.createElement("div");
+        div.className = "reg";
+        div.innerText = `x${i}: ${val}`;
+        rgrid.appendChild(div);
+      });
+
+      const mgrid = document.getElementById("memoryGrid");
+      mgrid.innerHTML = "";
+      mem.forEach((val, i) => {
+        const div = document.createElement("div");
+        div.className = "mem";
+        div.innerText = `M[${i*4}]: ${val}`;
+        mgrid.appendChild(div);
+      });
+
+      document.getElementById("regWrite").innerText = 1;
+      document.getElementById("memRead").innerText = pipeline[3].startsWith("lw") ? 1 : 0;
+      document.getElementById("memWrite").innerText = pipeline[3].startsWith("sw") ? 1 : 0;
+
+      document.getElementById("instCount").innerText = instCount;
+      document.getElementById("stallCount").innerText = 0;
+      document.getElementById("cpi").innerText = (cycle / (instCount || 1)).toFixed(2);
+    }
+
+    function runCycle() {
+      cycle++;
+      for (let i = pipeline.length - 1; i > 0; i--) {
+        pipeline[i] = pipeline[i - 1];
+      }
+      if (cycle <= instructions.length) {
+        pipeline[0] = instructions[cycle - 1];
+        instCount++;
+      } else {
+        pipeline[0] = "";
+        if (!pipeline.some(stage => stage !== "")) {
+          clearInterval(interval);
+        }
+      }
+      updateDisplay();
+    }
+
+    function startSimulation() {
+      resetSimulation();
+      interval = setInterval(runCycle, 1000);
+    }
+
+    function resetSimulation() {
+      pipeline = ["", "", "", "", ""];
+      cycle = 0;
+      instCount = 0;
+      reg = Array.from({ length: 32 }, (_, i) => i * 2);
+      mem = Array.from({ length: 16 }, (_, i) => i * 4);
+      clearInterval(interval);
+      updateDisplay();
+    }
+
+    window.onload = updateDisplay;
+  </script>
+</body>
+
+</html>
