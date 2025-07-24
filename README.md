@@ -110,7 +110,7 @@ We have also developed a **GUI pipeline simulator** in HTML/CSS/JS:
 
 ## Team
 
-* **Lead Developer & Documenter:** Rehan ali, Rayan Badar
+* **Lead Developer & Documenter:** Rehan Ali, Rayan Badar
 * **RTL Code & Debugging:** Shariq Khan, M. Yasir
 * **Institute:** Namal University, Mianwali
 * **Course:** Computer Architecture Lab Project
