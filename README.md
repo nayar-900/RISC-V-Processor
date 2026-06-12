@@ -38,11 +38,11 @@ Pipeline Stages   →  IF → ID → EX → MEM → WB
 Registers         →  32 general-purpose registers (x0–x31)
 Hazard Handling   →  Forwarding Unit (data hazards) + Hazard Detection Unit (load-use stalls)
 Simulation        →  ModelSim / QuestaSim — waveform + console output
-Visualizer        →  Step-by-step GUI pipeline animator (HTML/CSS/JS)
+Visualizer        →  Step-by-step GUI pipeline animator (HTML/CSS/JS) 
 ```
 
 **Engineering decisions worth noting:**
-- Each pipeline stage isolated in its own Verilog module — `IF_ID`, `ID_EX`, `EX_MEM`, `MEM_WB` registers are independent, making debugging and waveform tracing per-stage straightforward
+- Each pipeline stage is isolated in its own Verilog module — `IF_ID`, `ID_EX`, `EX_MEM`, `MEM_WB` registers are independent, making debugging and waveform tracing per-stage straightforward
 - Forwarding unit resolves EX-EX and MEM-EX data hazards without stalling — only load-use hazards (where the value isn't available until after MEM) insert a single bubble via the Hazard Detection Unit
 - Control signals generated in the ID stage and carried forward through pipeline registers rather than re-decoded at each stage, keeping the control path clean and consistent
 - Instruction and data memories are separate modules — Harvard architecture — avoiding structural hazards between fetch and memory access in the same cycle
